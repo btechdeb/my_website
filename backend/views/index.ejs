@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MongoDB Data</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <% data.forEach(item => { %>
+        <h2>ID: <%= item._id %></h2>
+        <% Object.keys(item).forEach(key => { %>
+            <% if (Array.isArray(item[key])) { %>
+                <h3><%= key %></h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <% Object.keys(item[key][0]).forEach(subKey => { %>
+                                <th><%= subKey %></th>
+                            <% }) %>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% item[key].forEach(subItem => { %>
+                            <tr>
+                                <% Object.keys(subItem).forEach(subKey => { %>
+                                    <td><%= subItem[subKey] %></td>
+                                <% }) %>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } %>
+        <% }) %>
+    <% }) %>
+</body>
+</html>

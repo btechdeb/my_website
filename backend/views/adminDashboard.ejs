@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <!-- Include Sidebar -->
+    <%- include('partials/topnav') %>
+
+  <div class="dashboard-section">
+    <div class="dashboard-item">
+      <h3>Total Assets</h3>
+      <p id="total-assets">0</p>
+    </div>
+    <div class="dashboard-item">
+      <h3>Total Assigned Assets</h3>
+      <p id="total-assigned-assets">0</p>
+    </div>
+    <div class="dashboard-item">
+      <h3>Total Unassigned Assets</h3>
+      <p id="total-unassigned-assets">0</p>
+    </div>
+    <div class="dashboard-item">
+      <h3>Total Employees</h3>
+      <p id="total-employees">0</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        const response = await fetch('/api/dashboard-data');
+        const data = await response.json();
+
+        document.getElementById('total-assets').textContent = data.totalAssets;
+        document.getElementById('total-assigned-assets').textContent = data.totalAssignedAssets;
+        document.getElementById('total-unassigned-assets').textContent = data.totalUnassignedAssets;
+        document.getElementById('total-employees').textContent = data.totalEmployees;
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My MongoDB Website</title>
+</head>
+<body>
+  <h1>Items</h1>
+  <ul id="items"></ul>
+
+  <script>
+    async function fetchItems() {
+      try {
+        const response = await fetch('http://localhost:3000/api/items');
+        const items = await response.json();
+        const itemsList = document.getElementById('items');
+        items.forEach(item => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${item.name}: ${item.value}`;
+          itemsList.appendChild(listItem);
+        });
+      } catch (error) {
+        console.error('Error fetching items:', error);
+      }
+    }
+
+    window.onload = fetchItems;
+  </script>
+</body>
+</html>

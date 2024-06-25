@@ -1,0 +1,68 @@
+css
+Copy code
+/* adminDashboard.css */
+
+.topnav {
+  background-color: #f67126; /* Set background color */
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.logo {
+  height: 50px; /* Adjust the size of the logo as needed */
+}
+
+.topnav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.topnav ul li {
+  margin-left: 16px;
+}
+
+.topnav ul li a {
+  display: block;
+  color: white; /* Set text color to white for contrast */
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.topnav ul li a:hover {
+  background-color: #ddd; /* Change background on hover */
+  color: black; /* Change text color on hover */
+}
+
+.dashboard-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 100px;
+}
+
+.dashboard-item {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  flex: 1;
+  min-width: 200px;
+}
+
+.dashboard-item h3 {
+  margin-top: 0;
+}
+
+.dashboard-item p {
+  font-size: 24px;
+  margin: 10px 0 0;
+}

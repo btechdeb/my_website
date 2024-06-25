@@ -1,0 +1,89 @@
+<!-- edit.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Asset</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Ensure full viewport height */
+        }
+
+        .edit-form-container {
+            width: 100%; /* Extend container to cover the whole page */
+            max-width: 600px; /* Limit maximum width */
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            margin-left: 60px; /* Move towards left */
+            margin-right: auto; /* Move towards right */
+           
+
+        }
+
+        form {
+            display: grid;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"], textarea {
+            width: calc(100% - 16px);
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            width: calc(232% - 16px);
+            background-color: #f67126;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #f67126;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="edit-form-container">
+        <% if (item) { %> <!-- Update 'asset' to 'item' -->
+            <form action="/update_asset/<%= item._id %>" method="POST">
+                <% Object.keys(item).forEach(key => { %>
+                    <% if (key !== '_id') { %>
+                        <label for="<%= key %>"><%= key %>:</label>
+                        <input type="text" id="<%= key %>" name="<%= key %>" value="<%= item[key] %>">
+                    <% } %>
+                <% }) %>
+                <button type="submit">Update</button>
+            </form>
+        <% } else { %>
+            <p class="error-message">Asset not found.</p>
+        <% } %>
+    </div>
+</body>
+</html>

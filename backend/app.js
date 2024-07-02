@@ -8,6 +8,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const connectDB = require('./config/db');
 const path = require('path');
+const axios = require('axios');
 const { ObjectId, MongoClient } = require('mongodb'); // Import MongoClient from mongodb
 const cors = require('cors');
 dotenv.config();
@@ -17,7 +18,7 @@ connectDB();
 const app = express();
 const url = 'mongodb://localhost:27017'; // Replace with your MongoDB URL
 const dbName = 'my_website'; // Replace with your database name
-const collectionName = 'uml_data'; // Replace with your collection name
+const collectionName = 'data_uml'; // Replace with your collection name
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -163,11 +164,12 @@ app.get('/emplist', async (req, res) => {
       'MS Office/Libre Office': 1,
       'Invoice Date': 1,
       'Warranty/AMC Expiry Date': 1,
+      'Role': 1
     };
 
 
     const data = await collection.find({}, { projection }).toArray();
-    console.log(data)
+    
     res.json({ data: data})
     //res.render('emplist', { data: data });
   } catch (err) {
@@ -178,6 +180,71 @@ app.get('/emplist', async (req, res) => {
   }
 });
 
+app.get('/employee', async (req, res) => {
+  const { name } = req.query;
+  const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
+
+    const projection = {
+      'Location Name': 1,
+      'Plant': 1,
+      'Department': 1,
+      'Employee Name': 1,
+      'Domain ID': 1,
+      'PH_NO': 1,
+    };
+
+    const data = await collection.findOne({ 'Employee Name': name }, { projection });
+    console.log(data)
+    if (data) {
+      res.json({ data });
+    } else {
+      res.status(404).send('Employee not found');
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching data from the database");
+  } finally {
+    await client.close();
+  }
+});
+let users = [];
+
+// Function to fetch users from /emplist endpoint
+const fetchUsers = async () => {
+  try {
+    const response = await axios.get('http://localhost:3000/emplist');
+    users = response.data.data.map((user) => ({
+      employeeName: user['Employee Name'],
+      _id: user._id,
+      locationName: user['Location Name'],
+      plant: user['Plant'],
+      department: user['Department'],
+      domainID: user['Domain ID'],
+      phNo: user['PH_NO'],
+      role: user['Role']
+    }));
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+};
+
+// Fetch users when the server starts
+fetchUsers();
+
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find((u) => u.employeeName === username);
+
+  if (user && user._id.slice(-7) === password) {
+    res.json({ success: true , user});
+  } else {
+    res.json({ success: false });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

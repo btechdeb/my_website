@@ -1,67 +1,58 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-//import '../App.css' // Assuming your CSS file is in the same directory or adjust the path accordingly
+import { useNavigate } from 'react-router-dom';
+import '../css/login.css';
 
 const Login = () => {
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials({ ...credentials, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.get('http://localhost:3000/auth/login', {
-        params: {
-          username: credentials.username,
-          password: credentials.password,
-        },
-      });
-      if (response.status === 200) {
-        setMessage('Login successful!');
-        // You can redirect the user or handle login success here
+      const response = await axios.post('http://localhost:3000/api/login', { username, password });
+      const data = response.data;
+      console.log(data)
+      if (data.success) {
+        if (data.user.role === 'user') {
+          navigate('/user/dashboard/*', { state: { user: data.user } });
+        } else if (data.user.role === 'admin') {
+          navigate('/admin/dashboard/*', { state: { user: data.user } });
+        }
+      } else {
+        setMessage('Login failed. Please check your credentials.');
       }
     } catch (error) {
-      setMessage('Login failed. Please try again.');
+      setMessage('An error occurred. Please try again later.');
     }
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '300px' }}>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Logo_UshaMartin.png" alt="Company Logo" style={{ marginBottom: '20px' }} />
-        <div style={{ marginBottom: '10px', width: '100%' }}>
-          <label htmlFor="username" style={{ marginBottom: '5px', display: 'block' }}>Username</label>
+    <div className="login-container">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Logo_UshaMartin.png" alt="Logo" className="login-logo" />
+      <h2>Login</h2>
+      <form onSubmit={handleLogin} className="login-form">
+        <div className="form-group">
+          <label>Username:</label>
           <input
             type="text"
-            id="username"
-            name="username"
-            value={credentials.username}
-            onChange={handleChange}
-            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-            required
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </div>
-        <div style={{ marginBottom: '10px', width: '100%' }}>
-          <label htmlFor="password" style={{ marginBottom: '5px', display: 'block' }}>Password</label>
+        <div className="form-group">
+          <label>Password:</label>
           <input
             type="password"
-            id="password"
-            name="password"
-            value={credentials.password}
-            onChange={handleChange}
-            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#f67126', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          Login
-        </button>
-        {message && <p>{message}</p>}
+        <button type="submit" className="login-button">Login</button>
       </form>
+      <p>{message}</p>
     </div>
   );
 };

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import '../css/Emplist.css';
-import TopNav from './TopNav';
+import TopNav from './AdmTopNav';
 
-const AssetReport = () => {
+const Emplist = () => {
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -11,12 +12,15 @@ const AssetReport = () => {
     const [editFormData, setEditFormData] = useState(null);
     const [addFormData, setAddFormData] = useState({}); // State to hold the data for the new employee
 
+    const location = useLocation();
+    const employeeData = location.state || { };
+
     useEffect(() => {
         fetchData();
     }, []);
 
     const fetchData = () => {
-        fetch('http://localhost:3000/emplist')
+        fetch('http://localhost:3000/employee')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText);
@@ -76,7 +80,7 @@ const AssetReport = () => {
         });
 
         try {
-            const response = await fetch(`http://localhost:5000/edit_asset/${editFormData._id}`, {
+            const response = await fetch(`http://localhost:3000/edit_asset/${editFormData._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,7 +105,7 @@ const AssetReport = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/delete_asset/${id}`, {
+            const response = await fetch(`http://localhost:3000/delete_asset/${id}`, {
                 method: 'DELETE',
             });
 
@@ -135,7 +139,7 @@ const AssetReport = () => {
         });
 
         try {
-            const response = await fetch('http://localhost:5000/add_asset', {
+            const response = await fetch('http://localhost:3000/add_asset', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -158,7 +162,7 @@ const AssetReport = () => {
 
     return (
         <div className="app">
-            <TopNav />
+            <TopNav employeeData={employeeData}/>
             <div className="content gen-report-content">
                 <div className="table-container">
                     <div className="actions-container">
@@ -293,4 +297,4 @@ const AssetReport = () => {
     );
 };
 
-export default AssetReport;
+export default Emplist;

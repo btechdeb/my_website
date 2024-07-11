@@ -1,250 +1,396 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const dotenv = require('dotenv');
-const authRoutes = require('./routes/authRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const userRoutes = require('./routes/userRoutes');
-const connectDB = require('./config/db');
-const path = require('path');
-const axios = require('axios');
-const { ObjectId, MongoClient } = require('mongodb'); // Import MongoClient from mongodb
+const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
-dotenv.config();
-connectDB();
-
+const axios = require('axios'); // Import axios
+require('dotenv').config();
 
 const app = express();
-const url = 'mongodb://localhost:27017'; // Replace with your MongoDB URL
-const dbName = 'my_website'; // Replace with your database name
-const collectionName = 'data_uml'; // Replace with your collection name
+const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(express.static('public'));
 app.use(cors());
-// View engine setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.use(express.json());
 
-// Route handling
-app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
-app.use('/user', userRoutes);
+// MongoDB connection
+//
+const uri = "mongodb+srv://reetuparnarc:qVoObJ12XWvIaCLE@cluster0.m47uqml.mongodb.net/my_website";
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, 'public')));
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here';
 
-// Define routes
-app.get('/userDashboard', (req, res) => {
-  res.render('userDashboard');
-});
+let db; // Declare db variable
 
-app.get('/adminDashboard', (req, res) => {
-  res.render('adminDashboard');
-});
-
-app.get('/admin/addAsset', (req, res) => {
-  res.render('addAsset'); // Render the page for adding asset
-});
-
-app.get('/admin/genReport', async (req, res) => {
-  const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+async function run() {
   try {
     await client.connect();
-    const db = client.db(dbName);
-    const collection = db.collection(collectionName);
+    console.log('Connected to MongoDB');
 
-    const data = await collection.find({}).toArray();
+    db = client.db('my_website');
+    const collection = db.collection('data_uml');
+    const usersCollection = db.collection('users');
 
-    res.render('genReport', { data: data });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error retrieving data from MongoDB');
-  } finally {
-    await client.close();
-  }
-});
-
-app.post('/admin/addAsset', (req, res) => {
-  const formData = req.body;
-  const existingObjectID = req.body.existingObjectID;
-
-  // Check if existingObjectID is provided
-  if (!existingObjectID) {
-    return res.status(400).send("Existing ObjectID is required");
-  }
-
-  // Check if existingObjectID is a valid hexadecimal string
-  if (!ObjectId.isValid(existingObjectID)) {
-    return res.status(400).send("Invalid ObjectID");
-  }
-
-  const collection = mongoose.connection.collection('columns');
-  collection.updateOne(
-    { _id: new ObjectId(existingObjectID) },
-    { $push: { formData: formData } },
-    (err, result) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send("Error updating data in the database");
-      } else {
-        console.log("Form data added successfully to existing ObjectID:", existingObjectID);
-        res.status(200).send("Form data added successfully!");
+    // Fetch all items
+    app.get('/items', async (req, res) => {
+      try {
+        const items = await collection.find().toArray();
+        res.json(items);
+      } catch (error) {
+        res.status(500).json({ message: error.message });
       }
-    }
-  );
-});
-// Display edit form
-app.get('/edit_asset/:id', async (req, res) => {
-    const client = new MongoClient(url);
-    try {
-        await client.connect();
-        const db = client.db(dbName);
-        const item = await db.collection('uml_data').findOne({ _id: new ObjectId(req.params.id) });
-        if (!item) {
-            return res.status(404).send('Asset not found');
-        }
-        res.render('edit', { item }); // Corrected variable name to 'item'
-    } catch (err) {
+    });
+
+    // Fetch all data for report (admin access)
+    app.get('/admin/genReport', async (req, res) => {
+      try {
+        const data = await collection.find().toArray();
+        res.json(data); // Send data as JSON
+      } catch (err) {
         console.error(err);
-        res.status(500).send('Error retrieving asset');
-    } finally {
-        await client.close();
-    }
-});
-// Handle form submission
-app.post('/update_asset/:id', async (req, res) => {
-    const client = new MongoClient(url);
-    try {
-        await client.connect();
-        const db = client.db(dbName);
-        const updateData = req.body;
-        await db.collection('uml_data').updateOne(
-            { _id: new ObjectId(req.params.id) },
-            { $set: updateData }
+        res.status(500).send('Error retrieving data from MongoDB');
+      }
+    });
+
+    // Add new field to the collection
+    app.post('/addField', async (req, res) => {
+      const { fieldName, fieldType } = req.body;
+
+      if (!fieldName || !fieldType) {
+        return res.status(400).send('Field name and type are required');
+      }
+
+      try {
+        const updateQuery = { $set: { [fieldName]: getDefaultValue(fieldType) } };
+
+        await collection.updateMany({}, updateQuery);
+
+        res.status(200).send('Field added successfully');
+      } catch (error) {
+        console.error('Error adding field to DB:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+
+    const getDefaultValue = (fieldType) => {
+      switch (fieldType) {
+        case 'String':
+          return '';
+        case 'Number':
+          return 0;
+        case 'Boolean':
+          return false;
+        default:
+          return null;
+      }
+    };
+
+    // Update an asset by ID
+    app.put('/edit_asset/:id', async (req, res) => {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+      }
+
+      try {
+        const result = await collection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updateData }
         );
-        res.redirect('/admin/genReport'); // Redirect to the homepage or any other page after update
-    } finally {
-        await client.close();
-    }
-});
 
-app.get('/emplist', async (req, res) => {
-  const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
-  try {
-    await client.connect();
-    const db = client.db(dbName);
-    const collection = db.collection(collectionName);
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ message: 'Asset not found' });
+        }
 
-    // Specify the columns you want to include in the projection
-    const projection = {
-      'Location Name': 1,
-      'Plant': 1,
-      'Asset No': 1,
-      'Department': 1,
-      'Employee Name': 1,
-      'Domain ID': 1,
-      'EMAIL ID': 1,
-      'PH_NO': 1,
-      'Make': 1,
-      'ITEMS': 1,
-      'Model No': 1,
-      'M/C Serial No': 1,
-      'Processor': 1,
-      'Speed': 1,
-      'RAM': 1,
-      'HDD': 1,
-      'Monitor': 1,
-      'Mac Address': 1,
-      'Operating System': 1,
-      'MS Office/Libre Office': 1,
-      'Invoice Date': 1,
-      'Warranty/AMC Expiry Date': 1,
-      'Role': 1
-    };
+        res.json({ message: 'Asset updated successfully' });
+      } catch (error) {
+        console.error('Error updating asset:', error);
+        res.status(500).json({ message: 'Server error', error });
+      }
+    });
+
+    // Fetch employee list
+    app.get('/employee', async (req, res) => {
+      try {
+        const projection = {
+          'Employee Name': 1,
+          'PH_NO': 1,
+          'Domain ID': 1,
+          // Add other columns as needed
+        };
+
+        const data = await collection.find({}, { projection }).toArray();
+        res.json(data);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Error fetching data from the database");
+      }
+    });
+
+    // Fetch asset details by ID
+    app.get('/get_asset/:id', async (req, res) => {
+      try {
+        const item = await collection.findOne(
+          { _id: new ObjectId(req.params.id) },
+          {
+            projection: {
+              Make: 1,
+              ITEMS: 1,
+              'Model No': 1,
+              'M/C Serial No': 1,
+              Processor: 1,
+              Speed: 1,
+              RAM: 1,
+              HDD: 1,
+              SSD: 1,
+              PORT: 1,
+              Monitor: 1,
+              'Mac Address': 1,
+              'Operating System': 1,
+              'OS Lic Key': 1,
+              'MS Office/Libre Office': 1,
+              'MS Office License No': 1,
+              'Model Year': 1,
+              'P O Number': 1,
+              'Invoice No': 1,
+              'Invoice Date': 1,
+              'Invoice Amount': 1,
+              'Supplier Name During Purchase': 1,
+              'Warranty/AMC Expiry Date': 1,
+              'If any AMC, Put Service Provider Name': 1,
+              'AMC Period': 1,
+              'AMC TYPE': 1,
+              Remarks: 1,
+            },
+          }
+        );
+        if (!item) {
+          return res.status(404).json({ error: 'Asset not found' });
+        }
+        res.json(item);
+      } catch (err) {
+        console.error('Error fetching asset details:', err);
+        res.status(500).json({ error: 'Error fetching asset details' });
+      }
+    });
+
+    // Add new asset
+    app.post('/add_asset', async (req, res) => {
+      const newItem = req.body;
+
+      if (!newItem['Employee Name']) {
+        return res.status(400).json({ message: 'Employee Name is required' });
+      }
+
+      try {
+        const result = await collection.insertOne(newItem);
+        res.status(201).json({ message: 'Asset added successfully', id: result.insertedId });
+      } catch (error) {
+        console.error('Error adding new asset:', error);
+        res.status(500).json({ message: 'Server error', error });
+      }
+    });
+
+    // Delete an asset by ID
+    app.delete('/delete_asset/:id', async (req, res) => {
+      const { id } = req.params;
+
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+      }
+
+      try {
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ message: 'Asset not found' });
+        }
+
+        res.json({ message: 'Asset deleted successfully' });
+      } catch (error) {
+        console.error('Error deleting asset:', error);
+        res.status(500).json({ message: 'Server error', error });
+      }
+    });
+
+    // Fetch dashboard data
+    app.get('/api/dashboard-data', async (req, res) => {
+      try {
+        if (!db) {
+          return res.status(500).json({ message: 'Database not initialized' });
+        }
+
+        const collection = db.collection('data_uml');
+
+        // Get total number of documents
+        const totalAssets = await collection.countDocuments();
+
+        // Get total assigned assets
+        const totalAssignedAssets = await collection.countDocuments({ assigned: true });
+
+        // Calculate total unassigned assets
+        const totalUnassignedAssets = await collection.countDocuments({ Scraped: { $in: ["yes", "Yes"] }});
 
 
-    const data = await collection.find({}, { projection }).toArray();
+        // Assume you have a separate collection for employees
+        const totalEmployees = await db.collection('data_uml').countDocuments();
+
+        res.json({
+          totalAssets,
+          totalAssignedAssets,
+          totalUnassignedAssets,
+          totalEmployees
+        });
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        res.status(500).json({ message: 'Server error' });
+      }
+    });
+
+    // Fetch employee list for login purposes
+    app.get('/emplist', async (req, res) => {
+      try {
+        const projection = {
+          'Location Name': 1,
+          'Plant': 1,
+          'Asset No': 1,
+          'Department': 1,
+          'Employee Name': 1,
+          'Domain ID': 1,
+          'EMAIL ID': 1,
+          'PH_NO': 1,
+          'Make': 1,
+          'ITEMS': 1,
+          'Model No': 1,
+          'M/C Serial No': 1,
+          'Processor': 1,
+          'Speed': 1,
+          'RAM': 1,
+          'HDD': 1,
+          'Monitor': 1,
+          'Mac Address': 1,
+          'Operating System': 1,
+          'MS Office/Libre Office': 1,
+          'Invoice Date': 1,
+          'Warranty/AMC Expiry Date': 1,
+          'Role': 1,
+          'pswd': 1
+        };
+
+        const data = await collection.find({}, { projection }).toArray();
+
+        res.json({ data: data });
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Error fetching data from the database");
+      }
+    });
+
+    app.post('/deleteField', async (req, res) => {
+      console.log('Request body:', req.body); // Log request body
+      const { fields } = req.body;
     
-    res.json({ data: data})
-    //res.render('emplist', { data: data });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching data from the database");
-  } finally {
-    await client.close();
-  }
-});
+      if (!fields || !Array.isArray(fields)) {
+        return res.status(400).json({ message: 'Fields array is required' });
+      }
+    
+      try {
+        const updateQuery = fields.reduce((acc, fieldName) => {
+          acc.$unset[fieldName] = "";
+          return acc;
+        }, { $unset: {} });
+    
+        await collection.updateMany({}, updateQuery);
+    
+        res.status(200).json({ message: 'Fields deleted successfully' });
+      } catch (error) {
+        console.error('Error deleting fields from DB:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+      }
+    });
 
-app.get('/employee', async (req, res) => {
-  const { name } = req.query;
-  const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
-  try {
-    await client.connect();
-    const db = client.db(dbName);
-    const collection = db.collection(collectionName);
+    app.put('/change-password', async (req, res) => {
+      const { employeeName, newPassword } = req.body;
+    
+      if (!employeeName || !newPassword) {
+        return res.status(400).json({ message: 'Employee Name and New Password are required' });
+      }
+    
+      try {
+        const result = await collection.updateOne(
+          { 'Employee Name': employeeName },
+          { $set: { pswd: newPassword } }
+        );
+    
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ message: 'Employee not found' });
+        }
+    
+        res.json({ message: 'Password updated successfully' });
+      } catch (error) {
+        console.error('Error updating password:', error);
+        res.status(500).json({ message: 'Server error', error });
+      }
+    });
+    
+    app.post('/add_asset', async (req, res) => {
+      const newItem = req.body;
 
-    const projection = {
-      'Location Name': 1,
-      'Plant': 1,
-      'Department': 1,
-      'Employee Name': 1,
-      'Domain ID': 1,
-      'PH_NO': 1,
+      if (!newItem['Employee Name']) {
+        return res.status(400).json({ message: 'Employee Name is required' });
+      }
+
+      try {
+        const result = await collection.insertOne(newItem);
+        res.status(201).json({ message: 'Asset added successfully', id: result.insertedId });
+      } catch (error) {
+        console.error('Error adding new asset:', error);
+        res.status(500).json({ message: 'Server error', error });
+      }
+    })
+
+    let users = [];
+
+    // Function to fetch users from /emplist endpoint
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(`http://localhost:${PORT}/emplist`);
+        users = response.data.data.map((user) => ({
+          employeeName: user['Employee Name'],
+          _id: user._id,
+          locationName: user['Location Name'],
+          plant: user['Plant'],
+          department: user['Department'],
+          domainID: user['Domain ID'],
+          phNo: user['PH_NO'],
+          role: user['Role'],
+          pswd: user['pswd']
+        }));
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
     };
 
-    const data = await collection.findOne({ 'Employee Name': name }, { projection });
-    console.log(data)
-    if (data) {
-      res.json({ data });
-    } else {
-      res.status(404).send('Employee not found');
-    }
+    // Fetch users when the server starts
+    fetchUsers();
+
+    app.post('/auth/login', (req, res) => {
+      const { username, password } = req.body;
+      const user = users.find((u) => u.employeeName === username);
+      console.log(user.pswd)
+      if (user && user.pswd === password) {
+        res.json({ success: true, user });
+      } else {
+        res.json({ success: false });
+      }
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching data from the database");
-  } finally {
-    await client.close();
+    console.error('Error connecting to MongoDB:', err);
   }
+}
+
+run().catch(console.dir);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-let users = [];
-
-// Function to fetch users from /emplist endpoint
-const fetchUsers = async () => {
-  try {
-    const response = await axios.get('http://localhost:3000/emplist');
-    users = response.data.data.map((user) => ({
-      employeeName: user['Employee Name'],
-      _id: user._id,
-      locationName: user['Location Name'],
-      plant: user['Plant'],
-      department: user['Department'],
-      domainID: user['Domain ID'],
-      phNo: user['PH_NO'],
-      role: user['Role']
-    }));
-  } catch (error) {
-    console.error('Error fetching users:', error);
-  }
-};
-
-// Fetch users when the server starts
-fetchUsers();
-
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  const user = users.find((u) => u.employeeName === username);
-
-  if (user && user._id.slice(-7) === password) {
-    res.json({ success: true , user});
-  } else {
-    res.json({ success: false });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,37 +1,40 @@
+
 /* userDashboard.css */
 
 .topnav {
-    background-color: #f67126; /* Set background color */
-    overflow: hidden;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 16px;
-  }
-  .logo {
-    height: 80px; /* Adjust the size of the logo as needed */
-    
-  }
-  .topnav ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-  }
+  background-color: #f67126; /* Set background color */
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+}
+.logo {
+  height: 80px; /* Adjust the size of the logo as needed */
   
-  .topnav ul li {
-    float: left;
-  }
-  
-  .topnav ul li a {
-    display: block;
-    color: white; /* Set text color to white for contrast */
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-  }
-  
-  .topnav ul li a:hover {
-    background-color: #ddd; /* Change background on hover */
-    color: black; /* Change text color on hover */
-  }
-  
+}
+.topnav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.topnav ul li {
+  float: left;
+}
+
+.topnav ul li a {
+  display: block;
+  color: white; /* Set text color to white for contrast */
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.topnav ul li a:hover {
+  background-color: #ddd; /* Change background on hover */
+  color: black; /* Change text color on hover */
+}
+
+
+

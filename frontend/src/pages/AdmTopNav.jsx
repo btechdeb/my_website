@@ -1,19 +1,27 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-
-const AdmTopNav = () => {
+import { Link } from 'react-router-dom';
+import "../css/topnav.css"
+const TopNav = ({ employeeData }) => {
+    console.log('TopNav employeeData:', employeeData);
     return (
-      <nav className="topnav">
+      <nav className="topnav bg-color-#f67126">
         <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Logo_UshaMartin.png" alt="Logo" className="logo" />
         <ul>
-          <li><Link to="/admin/dashboard">Dashboard</Link></li>
-          <li><Link to="/admin/addAsset">Add asset</Link></li>
-          <li><Link to="/admin/genRep">Asset Report</Link></li>
-          <li><Link to="/admin/chAdmin">Change Admin</Link></li>        
-          <li><Link to="/admin/profile">Profile</Link></li>
+          <li><Link to="/admin/dashboard" state={employeeData}>Dashboard</Link></li>
+          <li><Link to="/admin/employee" state={employeeData}>Employee</Link></li>
+          <li><Link to="/admin/assets" state={employeeData}>Assets</Link></li>
+          <li>
+            <Link 
+              to="/admin/profile" state={employeeData}
+            >
+              Profile
+            </Link>
+          </li>
+         <li><Link to="/admin/aboutus" state={employeeData}>About us</Link></li>
+         <li><Link to="/" style={{ backgroundColor: 'white', color: 'red', padding: '10px', borderRadius: '5px' }}>Logout</Link></li>
         </ul>
       </nav>
     );
   };
 
-export default AdmTopNav
+export default TopNav

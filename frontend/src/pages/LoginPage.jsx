@@ -49,41 +49,48 @@ const LoginPage = () => {
 
   return (
     <div className="loginPage">
-      <div className="loginContainer">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Logo_UshaMartin.png" alt="Logo" className="loginLogo" />
-        <h2 className="heading">Login</h2>
-        <form onSubmit={handleLogin}>
-          <div className="formGroup">
-            <label className="label" htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              className="input"
-              required
-            />
-          </div>
-          <div className="formGroup">
-            <label className="label" htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              className="input"
-              required
-            />
-          </div>
-          {error && <p className="errorMessage">{error}</p>}
-          <button type="submit" className="button">Login</button>
-          <a href="/forgot-password" className="link">Forgot Password?</a>
-          <Link to='/changePass' className='link'>Change Password?</Link>
-        </form>
+      <div className="leftContainer">
+        <h2 className="instructionsHeading">Instructions</h2>
+        <p className="instructionsText">Welcome to the Asset Manager HomePage, please login to continue or in case you have forgotten your password you can click on Forgot Password. <br/> You can login as a user, admin or a supervisor according to the role which has been assigned to you.</p>
+      </div>
+      <div className="separator"></div>
+      <div className="rightContainer">
+        <div className="loginContainer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Logo_UshaMartin.png" alt="Logo" className="loginLogo" />
+          <h2 className="heading">Login</h2>
+          <form onSubmit={handleLogin}>
+            <div className="formGroup">
+              <label className="label" htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
+                className="input"
+                required
+              />
+            </div>
+            <div className="formGroup">
+              <label className="label" htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="input"
+                required
+              />
+            </div>
+            {error && <p className="errorMessage">{error}</p>}
+            <button type="submit" className="button">Login</button>
+            <a href="/forgot-password" className="link">Forgot Password?</a>
+            {/* <Link to='/changePass' className='link'>Change Password?</Link> */}
+          </form>
+        </div>
       </div>
     </div>
   );

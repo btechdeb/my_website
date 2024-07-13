@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../css/Emplist.css';
-import TopNav from './AdmTopNav';
+import TopNav from './TopNav';
 
 const Emplist = () => {
     const [data, setData] = useState([]);

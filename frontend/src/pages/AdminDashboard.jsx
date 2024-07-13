@@ -11,7 +11,7 @@ const AdminDashboard = () => {
   console.log("Admin EmployeeData:", employeeData)
   const [dashboardData, setDashboardData] = useState({
     totalAssets: 0,
-    totalAssignedAssets: 0,
+    totalAssignedAssets: 542,
     totalUnassignedAssets: 0,
     totalEmployees: 0
   });

@@ -1,9 +1,44 @@
 .loginPage {
   display: flex;
-  justify-content: center;
-  align-items: center;
   height: 100vh;
   background-color: #f0f0f0; /* Light gray background */
+}
+
+.leftContainer, .rightContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.leftContainer {
+  background-color: #f5f5f5;
+}
+
+.rightContainer {
+  background-color: #f5f5f5;
+}
+
+.separator {
+  width: 2px;
+  background-color: #f67126;
+  height: 100%;
+}
+
+.instructionsHeading {
+  font-size: 24px;
+  font-weight: normal; /* Normal font weight */
+  color: gray; /* Gray color */
+  margin-bottom: 10px;
+}
+
+.instructionsText {
+  font-size: 16px;
+  color: gray; /* Gray color */
+  text-align: left; /* Left-aligned text */
+  margin-bottom: 20px;
 }
 
 .loginContainer {
@@ -13,6 +48,9 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
   text-align: center;
   width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the content horizontally */
 }
 
 .loginLogo {
@@ -27,6 +65,7 @@
 .formGroup {
   margin-bottom: 15px; /* Space below each form group */
   text-align: left;
+  width: 100%;
 }
 
 .label {
@@ -54,7 +93,7 @@
   margin-top: 10px; /* Space above the button */
 }
 
-.buttonHover:hover {
+.button:hover {
   background-color: #e67300; /* Darker orange on hover */
 }
 
@@ -65,7 +104,7 @@
   text-decoration: none; /* No underline */
 }
 
-.linkHover:hover {
+.link:hover {
   text-decoration: underline; /* Underline on hover */
 }
 

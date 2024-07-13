@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../css/Assets.css';
-import TopNav from '../pages/AdmTopNav';
+import TopNav from './TopNav';
 
 const Assets = () => {
   const location = useLocation();

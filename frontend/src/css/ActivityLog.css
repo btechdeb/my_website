@@ -1,0 +1,68 @@
+/* ActivityLog.css */
+.activity-log-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.activity-log-table-container {
+  margin-left: 50px; /* Adjust this value to shift the table */
+  padding: 20px;
+}
+
+.activity-log-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.activity-log-table, 
+.activity-log-table th, 
+.activity-log-table td {
+  border: 1px solid #ddd;
+}
+
+.activity-log-table th, 
+.activity-log-table td {
+  padding: 10px; /* Increased padding */
+  font-size: 14px; /* Increased font size */
+  text-align: left;
+}
+
+.activity-log-table th {
+  background: linear-gradient(to bottom, #ffc317, #f2f2f2);
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #ddd;
+}
+
+.activity-log-table thead th,
+.activity-log-table thead td {
+  background: linear-gradient(to bottom, #ffc317, #f2f2f2); /* Gradient background for the first row */
+}
+
+.activity-log-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.activity-log-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.activity-log-table td {
+  border-bottom: 1px solid #ddd;
+}
+
+.activity-log-table th:first-child,
+.activity-log-table td:first-child {
+  border-left: none;
+}
+
+.activity-log-table th:last-child,
+.activity-log-table td:last-child {
+  border-right: none;
+}

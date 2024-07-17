@@ -83,30 +83,66 @@ async function run() {
     };
 
     // Update an asset by ID
-    app.put('/edit_asset/:id', async (req, res) => {
-      const { id } = req.params;
-      const updateData = req.body;
+    // Update an asset by ID
+app.put('/edit_asset/:id', async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
 
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid ID format' });
+  }
+
+  try {
+    // Fetch the old data before updating
+    const oldData = await collection.findOne({ _id: new ObjectId(id) });
+
+    if (!oldData) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+
+    // Log the activity
+    const changes = Object.keys(updateData).reduce((acc, key) => {
+      if (updateData[key] != oldData[key]) {
+        acc[key] = { old: oldData[key], new: updateData[key] };
       }
+      return acc;
+    }, {});
 
-      try {
-        const result = await collection.updateOne(
-          { _id: new ObjectId(id) },
-          { $set: updateData }
-        );
+    const logEntry = {
+      timestamp: new Date(),
+      operation: 'edit_asset',
+      employeeName: updateData['Employee Name'] || 'Unknown Employee', // Adjust this based on your data structure
+      changes,
+    };
 
-        if (result.matchedCount === 0) {
-          return res.status(404).json({ message: 'Asset not found' });
-        }
+    await db.collection('activity_logs').insertOne(logEntry);
 
-        res.json({ message: 'Asset updated successfully' });
-      } catch (error) {
-        console.error('Error updating asset:', error);
-        res.status(500).json({ message: 'Server error', error });
-      }
-    });
+    res.json({ message: 'Asset updated successfully' });
+  } catch (error) {
+    console.error('Error updating asset:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+});
+
+app.get('/activity_logs', async (req, res) => {
+  try {
+    const logs = await db.collection('activity_logs').find().toArray();
+    res.json(logs);
+  } catch (error) {
+    console.error('Error fetching activity logs:', error);
+    res.status(500).json({ message: 'Error fetching activity logs' });
+  }
+});
+
 
     // Fetch employee list
     app.get('/employee', async (req, res) => {

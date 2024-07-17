@@ -8,6 +8,7 @@ import Assets from './pages/Assets';
 import Emplist from './pages/Emplist';
 import LoginPage from './pages/LoginPage'; // Import LoginPage
 import ChangePassword from './pages/ChangePass';
+import ActivityLog from './pages/ActivityLog';
 import AboutUs from './pages/AboutUs';
 import './css/styles.css'
 import SpvsrDashboard from './pages/SpvsrDashboard';
@@ -24,6 +25,7 @@ const App = () => {
       <Route path='/supervisor/profile' element={<Profile />}/>
       <Route path="/supervisor/employee" element={<UserEmpList />} />
       <Route path='/user/dashboard/*' element={<UserDashboard/>}/>
+      <Route path="/activity_logs" element={<ActivityLog />} />
       {/* <Route path='/user/emplist' element={<UserEmpList/>}/> */}
       <Route path='/user/profile' element={<Profile />}/>
       

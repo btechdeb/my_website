@@ -28,6 +28,7 @@ const Assets = () => {
       const response = await fetch('http://localhost:3000/items');
       const data = await response.json();
       setData(data);
+      console.log(data)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -261,6 +262,48 @@ const Assets = () => {
     console.error('Error deleting fields:', error);
   }
 };
+
+const downloadScrapedAssets = () => {
+  const scrapedAssets = data.filter(item => item.Scraped === "Yes");
+
+  const csvContent = [
+    Object.keys(scrapedAssets[0]).filter(key => key !== "pswd" && key !== "_id").join(","),
+    ...scrapedAssets.map(item =>
+      Object.values(item)
+        .filter((_, index) => Object.keys(item)[index] !== "pswd")
+        .join(",")
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "scraped_assets.csv");
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+const convertToCSV = (array) => {
+  const filteredHeaders = data.filter(header => header !== '_id' && header !== "pswd");
+  const header = filteredHeaders.join(',');
+  const rows = array.map(row => 
+    filteredHeaders.map(header => `"${row[header] || ''}"`).join(',')
+  );
+  return [header, ...rows].join('\n');
+};
+const downloadCSV = () => {
+  const csvData = convertToCSV(data);
+  const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'employees.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
   return (
     <div className="report-page">
       <TopNav employeeData={employeeData} />
@@ -283,15 +326,16 @@ const Assets = () => {
           <button id="addDataBtn" onClick={openForm}>Add Data</button>
           <button id="addFieldBtn" onClick={openFieldForm}>Add Field</button>
           <button id="deleteFieldBtn" onClick={openDeleteFieldForm}>Delete Field</button>
+          <button id="downloadScrapList"onClick={downloadScrapedAssets}>Download Scraped Assets List</button>
           <button id="toggleColumnsBtn" onClick={toggleColumns}>Toggle Columns</button>
-
+          <button id="downloadButton"onClick={downloadCSV} >Download CSV</button>
           <div id="addDataForm" className="modal">
             <div className="modal-content">
               <span className="close" onClick={closeForm}>&times;</span>
               <h2>Add New Data</h2>
               <form id="dataForm" onSubmit={addData}>
                 {data.length > 0 && Object.keys(data[0]).map((key) => (
-                  key !== '_id' && (
+                  key !== '_id' && key !== "pswd" && (
                     <div key={key}>
                       <label htmlFor={key}>{key}:</label>
                       <input type="text" id={key} name={key} /><br />
@@ -327,7 +371,7 @@ const Assets = () => {
               <h2>Delete Field</h2>
               <form id="deleteFieldForm" onSubmit={deleteField}>
                 {data.length > 0 && Object.keys(data[0]).map((key) => (
-                  key !== '_id' && (
+                  key !== '_id' && key !== "pswd" && (
                     <div key={key}>
                       <input type="checkbox" id={key} name={key} />
                       <label htmlFor={key}>{key}</label><br />
@@ -347,7 +391,7 @@ const Assets = () => {
               <form id="editForm" onSubmit={handleEditSubmit}>
                 {editFormData &&
                   Object.keys(editFormData).map((key) => (
-                    key !== '_id' && (
+                    key !== '_id' && key !== "pswd" && (
                       <div key={key}>
                         <label htmlFor={key}>{key}:</label>
                         <input
@@ -371,7 +415,7 @@ const Assets = () => {
               <tr>
                 {data.length > 0 &&
                   Object.keys(data[0]).map((key, index) => (
-                    key !== '_id' && (
+                    key !== '_id' && key !== "pswd" && (
                       <th key={key} className={index > 8 ? 'extra-column' : ''}>{key}</th>
                     )
                   ))}
@@ -382,7 +426,7 @@ const Assets = () => {
               {currentData.map((item, rowIndex) => (
                 <tr key={item._id}>
                   {Object.keys(item).map((key, colIndex) => (
-                    key !== '_id' && (
+                    key !== '_id' && key !== "pswd" && (
                       <td key={`${item._id}-${key}`} className={colIndex > 8 ? 'extra-column' : ''}>{item[key]}</td>
                     )
                   ))}

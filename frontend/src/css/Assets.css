@@ -3,7 +3,9 @@
 #addFieldBtn,
 #toggleColumnsBtn,
 #searchBtn,
-#deleteFieldBtn {
+#deleteFieldBtn,
+#downloadScrapList,
+#downloadButton {
   background-color: #f67126; /* Orange */
   border: none;
   color: white;

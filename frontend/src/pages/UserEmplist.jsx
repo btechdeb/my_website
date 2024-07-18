@@ -130,7 +130,7 @@ const UserEmpList = () => {
             <button onClick={handlePrevPage} disabled={currentPage === 1}>Prev Page</button>
             <button onClick={handleNextPage} disabled={indexOfLastItem >= filteredEmployees.length}>Next Page</button>
           </div>
-          <button onClick={downloadCSV} className="download-button">Download CSV</button>
+          {/* <button onClick={downloadCSV} className="download-button">Download CSV</button> */}
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ import Assets from './pages/Assets';
 import Emplist from './pages/Emplist';
 import LoginPage from './pages/LoginPage'; // Import LoginPage
 import ChangePassword from './pages/ChangePass';
+import ChangeAdmin from './pages/ChangeAdmin';
 import ActivityLog from './pages/ActivityLog';
 import AboutUs from './pages/AboutUs';
 import './css/styles.css'
@@ -16,7 +17,10 @@ const App = () => {
   return (
     <Routes>
       <Route path='/' element={<LoginPage/>}/>
-      <Route path='/changePass' element={<ChangePassword/>}/>
+      <Route path='/user/changePass' element={<ChangePassword/>}/>
+      <Route path='/admin/changePass' element={<ChangePassword/>}/>
+      <Route path='/supervisor/changePass' element={<ChangePassword/>}/>
+      <Route path='/changeAdmin' element={<ChangeAdmin/>}/>
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/assets" element={<Assets />} />
       <Route path="/admin/employee" element={<Emplist />} />
@@ -25,7 +29,8 @@ const App = () => {
       <Route path='/supervisor/profile' element={<Profile />}/>
       <Route path="/supervisor/employee" element={<UserEmpList />} />
       <Route path='/user/dashboard/*' element={<UserDashboard/>}/>
-      <Route path="/activity_logs" element={<ActivityLog />} />
+      <Route path="/admin/activity_logs" element={<ActivityLog />} />
+      <Route path="/supervisor/activity_logs" element={<ActivityLog />} />
       {/* <Route path='/user/emplist' element={<UserEmpList/>}/> */}
       <Route path='/user/profile' element={<Profile />}/>
       

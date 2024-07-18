@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import TopNav from '../pages/AdmTopNav';
+import TopNav from './TopNav';
 import '../css/ActivityLog.css'; // Make sure to create and import a CSS file for custom styles
 
 const ActivityLog = () => {
+  const location = useLocation();
+  const employeeData = location.state || { user: { employeeName: 'Unknown' } };
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
@@ -27,6 +30,7 @@ const ActivityLog = () => {
     //     data: body,
     //   };
     // }
+    console.log(url);
     if (method === 'PUT' && url.includes('/edit_asset')) {
       const changedData = {};
       for (const key in body) {
@@ -76,7 +80,7 @@ const ActivityLog = () => {
 
   return (
     <>
-      <TopNav />
+      <TopNav employeeData={employeeData}/>
       <div className="activity-log-container">
         <h2>Activity Log</h2>
         <table className="activity-log-table">
@@ -89,16 +93,20 @@ const ActivityLog = () => {
             </tr>
           </thead>
           <tbody>
-            {logs.map((log, index) => {
+            {logs.map((log, index) => { 
               const oldData = log.oldData || {}; // Assuming oldData is included in the log entry
-              const { changes, operation } = log;
+              const { changes, operation, fieldName, fieldType, fields } = log;
               const employeeName = getEmployeeName(log);
-              return (
+              
+              return ( 
                 <tr key={index}>
                   <td>{new Date(log.timestamp).toLocaleString()}</td>
                   <td>{operation}</td>
-                  <td>{employeeName}</td>
-                  <td><pre>{JSON.stringify(changes, null, 2)}</pre></td>
+                  <td>{operation === "delete_asset" || operation === "Add Field" || operation === "Delete Field"? "Check Data column":employeeName}</td>
+                  <td>{operation === "Add Field" || operation === "Delete Field"? (<pre>{JSON.stringify(fieldName, null, 2)}<br/>
+                  {JSON.stringify(fieldType, null, 2)} <br/>
+                  {JSON.stringify(fields, null, 2)}
+                  </pre>):(<pre>{JSON.stringify(changes, null, 2)}</pre>)}</td>
                 </tr>
               );
             })}

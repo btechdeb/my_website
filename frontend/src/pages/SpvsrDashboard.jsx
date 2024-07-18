@@ -7,6 +7,7 @@ const SpvsrDashboard = () => {
   const location = useLocation();
   const employeeData = location.state || { user: { employeeName: 'Unknown' } };
   console.log("Supervisor Dashboard:" ,employeeData)
+  const user = employeeData.user;
   const [dashboardData, setDashboardData] = useState({
     totalAssets: 0,
     totalAssignedAssets: 0,
@@ -34,7 +35,7 @@ const SpvsrDashboard = () => {
   return (
     <div className="spvsr-dashboard">
       <TopNav employeeData={employeeData} />
-      <h1 style={{ padding: '150px 0 0 150px' }}>Welcome {employeeData.user.employeeName}. You have <span style={{ color: "#F6BE00"}}>{capitalizeFirstLetter(employeeData.user.role)}</span> level access </h1>
+      <h1 style={{ padding: '150px 0 0 150px' }}>Welcome {user["Employee Name"]}. You have <span style={{ color: "#F6BE00"}}>{capitalizeFirstLetter(user["Role"])}</span> level access </h1>
 
       <div className="dashboard-section">
         <div className="dashboard-item">

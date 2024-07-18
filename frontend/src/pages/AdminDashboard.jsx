@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../css/adminDashboard.css';
@@ -9,6 +8,7 @@ const AdminDashboard = () => {
   const location = useLocation();
   const employeeData = location.state || { user: { employeeName: 'Unknown' } };
   console.log("Admin EmployeeData:", employeeData)
+  const user = employeeData.user;
   const [dashboardData, setDashboardData] = useState({
     totalAssets: 0,
     totalAssignedAssets: 542,
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
   return (
     <div className="admin-dashboard">
       <TopNav employeeData={employeeData} />
-      <h1 style={{ padding: '150px 0 0 150px', fontSize: '1.25em' }}>Welcome {employeeData.user.employeeName}. You have <span style={{ color: "Green"}}>{capitalizeFirstLetter(employeeData.user.role)}</span> level access</h1>
+      <h1 style={{ padding: '150px 0 0 150px', fontSize: '1.25em' }}>Welcome {user["Employee Name"]}. You have <span style={{ color: "Green"}}>{capitalizeFirstLetter(user["Role"])}</span> level access</h1>
       
       {error ? (
         <p className="error-message">Error: {error}</p>

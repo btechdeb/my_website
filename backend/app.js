@@ -52,20 +52,33 @@ async function run() {
     // Add new field to the collection
     app.post('/addField', async (req, res) => {
       const { fieldName, fieldType } = req.body;
-
+    
       if (!fieldName || !fieldType) {
-        return res.status(400).send('Field name and type are required');
+        return res.status(400).json({ message: 'Field name and type are required' });
       }
-
+    
       try {
+        // Update query to add new field with default value
         const updateQuery = { $set: { [fieldName]: getDefaultValue(fieldType) } };
-
+    
+        // Update all documents in the collection with the new field
         await collection.updateMany({}, updateQuery);
-
-        res.status(200).send('Field added successfully');
+    
+        // Log the activity
+        const activityLog = {
+          timestamp: new Date(),
+          operation: 'Add Field',
+          fieldName,
+          fieldType,
+        };
+    
+        const logResult = await db.collection('activity_logs').insertOne(activityLog);
+        console.log('Activity logged:', logResult);
+    
+        res.status(200).json({ message: 'Field added successfully', success: true });
       } catch (error) {
         console.error('Error adding field to DB:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ message: 'Server error', error });
       }
     });
 
@@ -210,37 +223,69 @@ app.get('/activity_logs', async (req, res) => {
     });
 
     // Add new asset
-    app.post('/add_asset', async (req, res) => {
-      const newItem = req.body;
 
-      if (!newItem['Employee Name']) {
-        return res.status(400).json({ message: 'Employee Name is required' });
-      }
 
-      try {
-        const result = await collection.insertOne(newItem);
-        res.status(201).json({ message: 'Asset added successfully', id: result.insertedId });
-      } catch (error) {
-        console.error('Error adding new asset:', error);
-        res.status(500).json({ message: 'Server error', error });
-      }
-    });
+app.post('/add_asset', async (req, res) => {
+  const newItem = req.body;
+
+  if (!newItem['Employee Name']) {
+    return res.status(400).json({ message: 'Employee Name is required' });
+  }
+
+  try {
+    const result = await collection.insertOne(newItem);
+
+    // Log the addition in activity_logs collection
+    const logEntry = {
+      timestamp: new Date(),
+      operation: 'add_asset',
+      employeeName: newItem['Employee Name'],
+      changes: { ...newItem },
+    };
+
+    await db.collection('activity_logs').insertOne(logEntry);
+
+    res.status(201).json({ message: 'Asset added successfully', id: result.insertedId });
+  } catch (error) {
+    console.error('Error adding new asset:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+});
+
+
 
     // Delete an asset by ID
     app.delete('/delete_asset/:id', async (req, res) => {
       const { id } = req.params;
-
+    
       if (!ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID format' });
       }
-
+    
       try {
+        // Find the asset before deletion to log its data
+        const asset = await collection.findOne({ _id: new ObjectId(id) });
+    
+        if (!asset) {
+          return res.status(404).json({ message: 'Asset not found' });
+        }
+    
         const result = await collection.deleteOne({ _id: new ObjectId(id) });
-
+    
         if (result.deletedCount === 0) {
           return res.status(404).json({ message: 'Asset not found' });
         }
-
+    
+        // Log the deletion in activity_logs collection
+        const logEntry = {
+          timestamp: new Date(),
+          operation: 'delete_asset',
+          employeeName: req.body.employeeName, // Assumes employeeName is passed in the request body
+          changes: { ...asset },
+        };
+    
+        await db.collection('activity_logs').insertOne(logEntry);
+    
         res.json({ message: 'Asset deleted successfully' });
       } catch (error) {
         console.error('Error deleting asset:', error);
@@ -261,10 +306,12 @@ app.get('/activity_logs', async (req, res) => {
         const totalAssets = await collection.countDocuments();
 
         // Get total assigned assets
-        const totalAssignedAssets = await collection.countDocuments({ assigned: true });
+        
 
         // Calculate total unassigned assets
         const totalUnassignedAssets = await collection.countDocuments({ Scraped: { $in: ["yes", "Yes"] }});
+
+        const totalAssignedAssets = totalAssets - totalUnassignedAssets;
 
 
         // Assume you have a separate collection for employees
@@ -330,28 +377,75 @@ app.get('/activity_logs', async (req, res) => {
       }
     
       try {
+        // Construct the update query to unset (delete) fields
         const updateQuery = fields.reduce((acc, fieldName) => {
           acc.$unset[fieldName] = "";
           return acc;
         }, { $unset: {} });
     
+        // Update all documents in the collection to unset specified fields
         await collection.updateMany({}, updateQuery);
     
-        res.status(200).json({ message: 'Fields deleted successfully' });
+        // Log the activity of deleting fields
+        const activityLog = {
+          timestamp: new Date(),
+          operation: 'Delete Field',
+          fields, // Log the deleted fields
+        };
+    
+        // Insert the activity log into the 'activity_logs' collection
+        const logResult = await db.collection('activity_logs').insertOne(activityLog);
+        console.log('Activity logged:', logResult);
+    
+        res.status(200).json({ message: 'Fields deleted successfully', success: true });
       } catch (error) {
         console.error('Error deleting fields from DB:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ message: 'Internal Server Error', error });
       }
     });
-
-    app.put('/change-password', async (req, res) => {
-      const { employeeName, newPassword } = req.body;
     
-      if (!employeeName || !newPassword) {
-        return res.status(400).json({ message: 'Employee Name and New Password are required' });
+
+    // app.post('/change-password', async (req, res) => {
+    //   const { employeeName, newPassword } = req.body;
+    
+    //   if (!employeeName || !newPassword) {
+    //     return res.status(400).json({ message: 'Employee Name and New Password are required' });
+    //   }
+    
+    //   try {
+    //     const result = await collection.updateOne(
+    //       { 'Employee Name': employeeName },
+    //       { $set: { pswd: newPassword } }
+    //     );
+    
+    //     if (result.matchedCount === 0) {
+    //       return res.status(404).json({ message: 'Employee not found' });
+    //     }
+    
+    //     res.json({ message: 'Password updated successfully' });
+    //   } catch (error) {
+    //     console.error('Error updating password:', error);
+    //     res.status(500).json({ message: 'Server error', error });
+    //   }
+    // });
+    app.post('/change-password', async (req, res) => {
+      const { employeeName, currentPassword, newPassword } = req.body;
+    
+      if (!employeeName || !currentPassword || !newPassword) {
+        return res.status(400).json({ message: 'Employee Name, Current Password, and New Password are required' });
       }
     
       try {
+        const user = await collection.findOne({ 'Employee Name': employeeName });
+        
+        if (!user) {
+          return res.status(404).json({ message: 'Employee not found' });
+        }
+    
+        if (user.pswd !== currentPassword) {
+          return res.status(401).json({ message: 'Current password is incorrect' });
+        }
+    
         const result = await collection.updateOne(
           { 'Employee Name': employeeName },
           { $set: { pswd: newPassword } }
@@ -361,12 +455,13 @@ app.get('/activity_logs', async (req, res) => {
           return res.status(404).json({ message: 'Employee not found' });
         }
     
-        res.json({ message: 'Password updated successfully' });
+        res.json({ success: true, message: 'Password updated successfully' });
       } catch (error) {
         console.error('Error updating password:', error);
         res.status(500).json({ message: 'Server error', error });
       }
     });
+    
     
     app.post('/add_asset', async (req, res) => {
       const newItem = req.body;
@@ -409,21 +504,69 @@ app.get('/activity_logs', async (req, res) => {
     // Fetch users when the server starts
     fetchUsers();
 
-    app.post('/auth/login', (req, res) => {
+    app.post('/auth/login', async (req, res) => {
       const { username, password } = req.body;
-      const user = users.find((u) => u.employeeName === username);
-      console.log(user.pswd)
-      if (user && user.pswd === password) {
-        res.json({ success: true, user });
-      } else {
-        res.json({ success: false });
+    
+      try {
+        const user = await collection.findOne({ 'Employee Name': username, 'pswd': password });
+    
+        if (user) {
+          res.json({ success: true, user });
+        } else {
+          res.json({ success: false });
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ message: 'Server error', error });
+      }
+    });
+    app.post('/verify_user', async (req, res) => {
+      const { employeeName, password } = req.body;
+    
+      try {
+        const user = await collection.findOne({ 'Employee Name': employeeName, pswd: password });
+        console.log(user);
+        if (!user) {
+          return res.status(401).json({ message: 'Invalid credentials' });
+        }
+    
+        res.json({ isAdmin: user["Role"] === 'admin' });
+      } catch (error) {
+        console.error('Error verifying user:', error);
+        res.status(500).json({ message: 'Server error', error });
+      }
+    });
+    
+    app.post('/change_roles', async (req, res) => {
+      const { currentAdmin, newAdmin } = req.body;
+    
+      try {
+        // Update current admin to user
+        await collection.updateOne(
+          { 'Employee Name': currentAdmin },
+          { $set: { Role: 'user' } }
+        );
+    
+        // Update new admin to admin
+        await collection.updateOne(
+          { 'Employee Name': newAdmin },
+          { $set: { Role: 'admin' } }
+        );
+    
+        res.json({ message: 'Roles changed successfully' });
+      } catch (error) {
+        console.error('Error changing roles:', error);
+        res.status(501).json({ message: 'Server error', error });
       }
     });
 
   } catch (err) {
     console.error('Error connecting to MongoDB:', err);
   }
+  
 }
+
+
 
 run().catch(console.dir);
 

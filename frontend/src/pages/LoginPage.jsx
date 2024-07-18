@@ -16,13 +16,15 @@ const LoginPage = () => {
     try {
       const response = await axios.post('http://localhost:3000/auth/login', { username, password });
       const data = response.data;
-      console.log(data);
+      console.log(data.success);
+      const user = data.user;
+      console.log(user["Role"])
       if (data.success) {
-        if (data.user.role === 'user') {
+        if (user["Role"] === 'user') {
           navigate('/user/dashboard', { state: { user: data.user } });
-        } else if (data.user.role === 'admin') {
+        } else if (user["Role"] === 'admin') {
           navigate('/admin/dashboard', { state: { user: data.user } });
-        } else if (data.user.role === 'supervisor') {
+        } else if (user["Role"] === 'supervisor') {
           navigate('/supervisor/dashboard', { state: { user: data.user } });
         }
       } else {

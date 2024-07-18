@@ -1,68 +1,56 @@
-/* Ensure the body has no margin or padding */
+/* General reset for margin and padding */
 body {
   margin: 0;
   padding: 0;
 }
 
-/* Ensure the top navigator spans the full width */
+/* Top navigation bar styling */
 .navbar {
   width: 100%;
-  background-color: #333; /* Change this to your desired color */
-  padding: 0;
-  margin: 0;
+  background-color: #f67126;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 5px 16px;
   box-sizing: border-box;
 }
 
-/* Remove margin and padding from the container inside the navbar */
-.navbar .container {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-sizing: border-box;
-}
-
-/* Style for the logo */
-.navbar .logo {
+/* Logo styling */
+.logo {
+  height: 80px;
   margin: 0;
   padding: 0;
 }
 
-/* Style for the navigation links */
-.navbar .nav-links {
+/* Navigation links styling */
+.nav-links {
   display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* Style for each navigation link */
-.navbar .nav-links li {
+.nav-links li {
   margin: 0;
   padding: 10px 15px;
   color: white;
 }
 
-/* Add some spacing around the content sections */
+/* Container styling */
 .container {
   padding: 20px;
 }
 
-/* Example for the dashboard content */
+/* Dashboard content styling */
 .dashboard {
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding: 20px;
-  background-color: #f0f0f0; /* Adjust background color if needed */
+  background-color: #f0f0f0;
 }
 
-/* Styles for the cards */
+/* Card styling */
 .card {
   background-color: white;
   padding: 20px;
@@ -72,6 +60,47 @@ body {
   width: 200px;
 }
 
-.dashboard-section{
+.dashboard-section {
   padding: 0 120px;
+}
+
+/* Dropdown styling */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropbtn {
+  display: block;
+  color: white;
+  padding: 14px 16px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Dropdown content styling */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+  display: block;
 }

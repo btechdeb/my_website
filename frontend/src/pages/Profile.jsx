@@ -10,21 +10,21 @@ const Profile = () => {
 
   console.log('Profile location:', location);
   console.log('Profile employeeData:', employeeData);
-
+  const user = employeeData.user;
   return (
     <div>
       <TopNav employeeData={employeeData} />
       <div className="profile">
         <img 
-          src={employeeData?.user?.profileImage || defaultProfileImage} 
-          alt={`${employeeData?.user?.employeeName}'s profile`} 
+          src={user["Profile Image"] || defaultProfileImage} 
+          alt={`${user["Employee Name"]}'s profile`} 
         />
-        <p><strong>Location Name:</strong> {employeeData?.user?.locationName}</p>
-        <p><strong>Plant:</strong> {employeeData?.user?.plant}</p>
-        <p><strong>Department:</strong> {employeeData?.user?.department}</p>
-        <p><strong>Domain ID:</strong> {employeeData?.user?.domainID}</p>
-        <p><strong>Phone Number:</strong> {employeeData?.user?.phNo}</p>
-        <p><strong>Role:</strong> {employeeData?.user?.role}</p>
+        <p><strong>Location Name:</strong> {user["Location Name"]}</p>
+        <p><strong>Plant:</strong> {user["Plant"]}</p>
+        <p><strong>Department:</strong> {user["Department"]}</p>
+        <p><strong>Domain ID:</strong> {user["Domain ID"]}</p>
+        <p><strong>Phone Number:</strong> {user["PH_NO"]}</p>
+        <p><strong>Role:</strong> {user["Role"]}</p>
       </div>
     </div>
   );

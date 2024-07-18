@@ -6,7 +6,8 @@ import axios from 'axios';
 const UserDashboard = () => {
   const location = useLocation();
   const employeeData = location.state || { user: { employeeName: 'Unknown' } };
-  
+  console.log(employeeData);
+  const user = employeeData.user;
   const [employees, setEmployees] = useState([]);
   const [headers, setHeaders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,8 +24,8 @@ const UserDashboard = () => {
         console.log(data);
 
         // Filter the data where the employee name matches
-        const filteredData = data.filter(emp => emp["Employee Name"] === employeeData.user.employeeName);
-
+        const filteredData = data.filter(emp => emp["Employee Name"] === user["Employee Name"]);
+        console.log(filteredData);
         setEmployees(filteredData);
 
         if (filteredData.length > 0) {
@@ -84,7 +85,7 @@ const UserDashboard = () => {
   return (
     <div className="user-dashboard">
       <TopNav employeeData={employeeData} />
-      <h1 style={{ padding: '150px 0 0 150px' }}>Welcome {employeeData.user.employeeName}. You have <span style={{ color: "grey"}}>{capitalizeFirstLetter(employeeData.user.role)}</span> level access</h1>
+      <h1 style={{ padding: '150px 0 0 150px' }}>Welcome {user["Employee Name"]}. You have <span style={{ color: "grey"}}>{capitalizeFirstLetter(user["Role"])}</span> level access</h1>
 
       <div className="container">
         <h2 className="text-4xl font-bold mb-6" style={{ fontSize: '2em' }}>Your Assets</h2>

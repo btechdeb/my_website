@@ -434,7 +434,7 @@ app.post('/add_asset', async (req, res) => {
     app.post('/change-password', async (req, res) => {
       const { employeeName, currentPassword, newPassword } = req.body;
     
-      if (!employeeName || !currentPassword || !newPassword) {
+      if (!employeeName  || !newPassword) {
         return res.status(400).json({ message: 'Employee Name, Current Password, and New Password are required' });
       }
     

@@ -89,7 +89,7 @@ const LoginPage = () => {
             </div>
             {error && <p className="errorMessage">{error}</p>}
             <button type="submit" className="button">Login</button>
-            <a href="/forgot-password" className="link">Forgot Password?</a>
+            {/* <a href="/forgot-password" className="link">Forgot Password?</a> */}
             {/* <Link to='/changePass' className='link'>Change Password?</Link> */}
           </form>
         </div>

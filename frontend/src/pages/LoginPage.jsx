@@ -84,7 +84,7 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 className="input"
-                required
+                
               />
             </div>
             {error && <p className="errorMessage">{error}</p>}

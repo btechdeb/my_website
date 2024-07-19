@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import '../css/adminDashboard.css';
+//import '../css/adminDashboard.css';
+import '../css/Assets.css'
 import TopNav from '../pages/TopNav'; // Assuming TopNav.jsx is in the same directory
 import axios from 'axios';
 const UserDashboard = () => {
@@ -85,9 +86,9 @@ const UserDashboard = () => {
   return (
     <div className="user-dashboard">
       <TopNav employeeData={employeeData} />
-      <h1 style={{ padding: '150px 0 0 150px' }}>Welcome {user["Employee Name"]}. You have <span style={{ color: "grey"}}>{capitalizeFirstLetter(user["Role"])}</span> level access</h1>
+      <h1 style={{ padding: '100px 0 0 150px' }}>Welcome {user["Employee Name"]}. You have <span style={{ color: "grey"}}>{capitalizeFirstLetter(user["Role"])}</span> level access</h1>
 
-      <div className="container">
+      <div className="container" style={{ width: "80%", paddingLeft: '100px'}}>
         <h2 className="text-4xl font-bold mb-6" style={{ fontSize: '2em' }}>Your Assets</h2>
         <input
           type="text"
@@ -102,7 +103,7 @@ const UserDashboard = () => {
               <thead>
                 <tr>
                   {headers.map((header, index) => (
-                    <th key={index}>{header === '_id' ? "Sl. No" : header}</th>
+                    <th key={index}>{header === '_id' ? "" : header}</th>
                   ))}
                 </tr>
               </thead>
@@ -111,7 +112,7 @@ const UserDashboard = () => {
                   <tr key={rowIndex}>
                     {headers.map((header, colIndex) => (
                       <td key={colIndex}>
-                        {header === '_id' ? (indexOfFirstItem + rowIndex + 1) : employee[header]}
+                        {header === '_id' ? ('') : employee[header]}
                       </td>
                     ))}
                   </tr>
@@ -125,7 +126,7 @@ const UserDashboard = () => {
             <button onClick={handlePrevPage} disabled={currentPage === 1}>Prev Page</button>
             <button onClick={handleNextPage} disabled={indexOfLastItem >= filteredEmployees.length}>Next Page</button>
           </div>
-          <button onClick={downloadCSV} className="download-button">Download CSV</button>
+          {/* {<button onClick={downloadCSV} className="download-button">Download CSV</button>} */}
         </div>
       </div>
     </div>

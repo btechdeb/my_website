@@ -2,6 +2,9 @@ const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const axios = require('axios'); // Import axios
+const { Parser } = require('json2csv');
+const fs = require('fs');
+const path = require('path')
 require('dotenv').config();
 
 const app = express();
@@ -359,7 +362,7 @@ app.post('/add_asset', async (req, res) => {
           'pswd': 1
         };
 
-        const data = await collection.find({}, { projection }).toArray();
+        const data = await collection.find().toArray();
 
         res.json({ data: data });
       } catch (err) {
@@ -557,6 +560,35 @@ app.post('/add_asset', async (req, res) => {
       } catch (error) {
         console.error('Error changing roles:', error);
         res.status(501).json({ message: 'Server error', error });
+      }
+    });
+    app.get('/download_csv', async (req, res) => {
+      let client;
+    
+      try {
+        client = await MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+        const database = client.db('my_website');
+        const collection = database.collection('data_uml');
+    
+        const data = await collection.find().toArray();
+        if (!data || data.length === 0) {
+          return res.status(404).send('No data found');
+        }
+    
+        const fields = Object.keys(data[0]).filter(field => field !== '_id' && field !== 'pswd');
+        const json2csvParser = new Parser({ fields });
+        const csv = json2csvParser.parse(data);
+    
+        res.setHeader('Content-disposition', 'attachment; filename=data_uml.csv');
+        res.set('Content-Type', 'text/csv');
+        res.status(200).send(csv);
+      } catch (error) {
+        console.error('Error generating CSV:', error);
+        res.status(500).send('Error generating CSV');
+      } finally {
+        if (client) {
+          client.close();
+        }
       }
     });
 

@@ -293,16 +293,32 @@ const convertToCSV = (array) => {
   );
   return [header, ...rows].join('\n');
 };
-const downloadCSV = () => {
-  const csvData = convertToCSV(data);
-  const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', 'employees.csv');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+const downloadCSV = async () => {
+  try {
+    console.log('Requesting CSV download...');
+    const response = await fetch('http://localhost:3000/download_csv', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'text/csv',
+      },
+    });
+    if (!response.ok) {
+      console.error('Network response was not ok:', response);
+      throw new Error('Network response was not ok');
+    }
+    console.log('CSV download response received, processing...');
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'data_uml.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    console.log('CSV file downloaded successfully.');
+  } catch (error) {
+    console.error('Error downloading CSV:', error);
+  }
 };
   return (
     <div className="report-page">

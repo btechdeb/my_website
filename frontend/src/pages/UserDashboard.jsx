@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-//import '../css/adminDashboard.css';
-import '../css/Assets.css'
+import '../css/UserDashboarf.css'
 import TopNav from '../pages/TopNav'; // Assuming TopNav.jsx is in the same directory
 import axios from 'axios';
+
 const UserDashboard = () => {
   const location = useLocation();
   const employeeData = location.state || { user: { employeeName: 'Unknown' } };
-  console.log(employeeData);
   const user = employeeData.user;
   const [employees, setEmployees] = useState([]);
   const [headers, setHeaders] = useState([]);
@@ -18,15 +17,12 @@ const UserDashboard = () => {
   const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
+
   useEffect(() => {
     axios.get('http://localhost:3000/emplist')
       .then(response => {
         const data = response.data.data;
-        console.log(data);
-
-        // Filter the data where the employee name matches
         const filteredData = data.filter(emp => emp["Employee Name"] === user["Employee Name"]);
-        console.log(filteredData);
         setEmployees(filteredData);
 
         if (filteredData.length > 0) {
@@ -36,7 +32,7 @@ const UserDashboard = () => {
       .catch(error => {
         console.error("There was an error fetching the employee list!", error);
       });
-  }, [employeeData.user.employeeName]);
+  }, [user["Employee Name"]]);
 
   const handleSearchChange = (event) => {
     setSearchKeyword(event.target.value);
@@ -97,36 +93,23 @@ const UserDashboard = () => {
           onChange={handleSearchChange}
           className="search-input"
         />
-        <div className="table-container">
-          <div className="table-wrapper">
-            <table className="table">
-              <thead>
-                <tr>
-                  {headers.map((header, index) => (
-                    <th key={index}>{header === '_id' ? "" : header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {currentEmployees.map((employee, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {headers.map((header, colIndex) => (
-                      <td key={colIndex}>
-                        {header === '_id' ? ('') : employee[header]}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="cards-container">
+          {currentEmployees.map((employee, rowIndex) => (
+            <div className="card" key={rowIndex}>
+              {headers.map((header, colIndex) => (
+                <div className="card-item" key={colIndex}>
+                  <strong>{header}:</strong> {employee[header]}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
         <div className="pagination-controls-container">
           <div className="pagination-controls">
             <button onClick={handlePrevPage} disabled={currentPage === 1}>Prev Page</button>
             <button onClick={handleNextPage} disabled={indexOfLastItem >= filteredEmployees.length}>Next Page</button>
           </div>
-          {/* {<button onClick={downloadCSV} className="download-button">Download CSV</button>} */}
+          {/* <button onClick={downloadCSV} className="download-button">Download CSV</button> */}
         </div>
       </div>
     </div>

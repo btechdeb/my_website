@@ -439,7 +439,7 @@ app.post('/add_asset', async (req, res) => {
       }
     
       try {
-        const user = await collection.findOne({ 'Employee Name': employeeName });
+        const user = await collection.findOne({ 'Employee Name': { $regex: new RegExp(`^${employeeName}$`, 'i') } });
         
         if (!user) {
           return res.status(404).json({ message: 'Employee not found' });
@@ -511,7 +511,7 @@ app.post('/add_asset', async (req, res) => {
       const { username, password } = req.body;
     
       try {
-        const user = await collection.findOne({ 'Employee Name': username, 'pswd': password });
+        const user = await collection.findOne({ 'Employee Name': { $regex: new RegExp(`^${username}$`, 'i') }, 'pswd': password });
     
         if (user) {
           res.json({ success: true, user });
@@ -546,13 +546,13 @@ app.post('/add_asset', async (req, res) => {
       try {
         // Update current admin to user
         await collection.updateOne(
-          { 'Employee Name': currentAdmin },
+          { 'Employee Name': { $regex: new RegExp(`^${currentAdmin}$`, 'i') } },
           { $set: { Role: 'user' } }
         );
     
         // Update new admin to admin
         await collection.updateOne(
-          { 'Employee Name': newAdmin },
+          { 'Employee Name': { $regex: new RegExp(`^${newAdmin}$`, 'i') } },
           { $set: { Role: 'admin' } }
         );
     

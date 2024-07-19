@@ -14,7 +14,7 @@ const TopNav = ({ employeeData }) => {
                 <span className="dropbtn">UITC - Asset Manager - More</span>
                 <div className="dropdown-content">
                     <Link to={`/${role}/aboutus`} state={employeeData}>About Us</Link>
-                    <Link to="/contact-us">Contact Us</Link>
+                    {/* <Link to="/contact-us">Contact Us</Link> */}
                     <Link to={`/${role}/changePass`} state={employeeData}>Change Password</Link>
                 </div>
             </div>
